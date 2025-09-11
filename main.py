@@ -1,5 +1,6 @@
-from utils import playwright_price_scraper
 import asyncio
+from utils import playwright_price_scraper
+
 
 def main():
     print("Hello from price-scraper!")

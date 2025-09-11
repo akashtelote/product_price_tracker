@@ -1,12 +1,9 @@
 import asyncio
 from playwright.async_api import async_playwright
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 import time
-from . import scrape_amazon
-from . import scrape_flipkart
-
+from .scrape_amazon import scrape_amazon
+from .scrape_flipkart import scrape_flipkart
+from .email_reports import send_report
 # ===== CONFIG =====
 PRODUCTS = [
     {
@@ -36,13 +33,13 @@ async def scrape_product(page, product):
     current_price, original_price, discount = 10e9, 10e9, 0.0
 
     if "amazon" in url:
-        amazon_scraped_prices = await scrape_amazon.scrape_amazon(url, page)
+        amazon_scraped_prices = await scrape_amazon(url, page)
         if amazon_scraped_prices is None:
             return None
         current_price, original_price = amazon_scraped_prices
 
     elif "flipkart" in url:
-        flipkart_scraped_prices = await scrape_flipkart.scrape_flipkart(url, page)
+        flipkart_scraped_prices = await scrape_flipkart(url, page)
         print(f"{flipkart_scraped_prices=}")
         if flipkart_scraped_prices is None:
             return None
@@ -88,59 +85,10 @@ async def track_prices():
         await browser.close()
 
     if results:
-        print(results)
-        # send_report(results)
+        # print(results)
+        send_report(results)
 
 
-def send_report(results):
-    """Send email with HTML table."""
-    subject = "Price Tracker Report"
-    html = """
-    <html>
-    <body>
-    <h2>Price Tracker Report</h2>
-    <table border="1" cellspacing="0" cellpadding="6" style="border-collapse: collapse;">
-    <tr style="background-color: #f2f2f2;">
-        <th>Product</th>
-        <th>Current Price (₹)</th>
-        <th>Original Price (₹)</th>
-        <th>Discount (%)</th>
-        <th>Threshold (₹)</th>
-        <th>Status</th>
-        <th>Link</th>
-    </tr>
-    """
-
-    for item in results:
-        html += f"""
-        <tr>
-            <td>{item['name']}</td>
-            <td>{item['current_price']}</td>
-            <td>{item['original_price']}</td>
-            <td>{item['discount']}%</td>
-            <td>{item['threshold']}</td>
-            <td>{item['status']}</td>
-            <td><a href="{item['url']}">View</a></td>
-        </tr>
-        """
-
-    html += "</table></body></html>"
-
-    msg = MIMEMultipart("alternative")
-    msg["From"] = SENDER_EMAIL
-    msg["To"] = RECEIVER_EMAIL
-    msg["Subject"] = subject
-    msg.attach(MIMEText(html, "html"))
-
-    try:
-        server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()
-        server.login(SENDER_EMAIL, SENDER_PASSWORD)
-        server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
-        server.quit()
-        print("✅ Email report sent!")
-    except Exception as e:
-        print("❌ Failed to send email:", e)
 
 async def main():
     await track_prices()
