@@ -7,19 +7,19 @@ requires-python = ">=3.13"
 dependencies = [
     "dotenv>=0.9.9",
     "playwright>=1.55.0",
+    "pre-commit>=4.3.0",
     "python-dotenv>=1.1.1",
+    "rich>=14.1.0",
 ]
 
 [tool.ruff]
-# Which files to lint
+# Python version
 target-version = "py311"
+
+# Formatting
 line-length = 100
 extend-exclude = ["migrations", "venv"]
 
-# Enable rules
-select = ["E", "F", "I"]   # E = pycodestyle, F = pyflakes, I = isort
-ignore = ["E501"]          # Example: ignore line length
-
-# Optional: fix automatically
-[tool.ruff.lint]
-fix = true
+# Rules
+lint.select = ["E", "F", "I", "B", "UP"]  # Style, bugs, imports, bugbear, pyupgrade
+lint.ignore = ["E501"]                    # Ignore line-length errors

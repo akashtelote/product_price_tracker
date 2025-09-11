@@ -1,8 +1,11 @@
 import os
 import smtplib
-from dotenv import load_dotenv
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+from dotenv import load_dotenv
+
+from utils.common import console
 
 load_dotenv()
 
@@ -12,9 +15,9 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL", "youremail@gmail.com")
 SENDER_PASSWORD = os.getenv("SENDER_PASSWORD", "your-app-password")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL", "targetemail@gmail.com")
 
-print(f"Using SENDER_EMAIL={SENDER_EMAIL}, RECEIVER_EMAIL={RECEIVER_EMAIL}")
 
-def send_report(results):
+
+def send_report(results : list) -> None:
     """Send email with HTML table."""
     subject = "Price Tracker Report"
     html = """
@@ -60,6 +63,6 @@ def send_report(results):
         server.login(SENDER_EMAIL, SENDER_PASSWORD)
         server.sendmail(SENDER_EMAIL, RECEIVER_EMAIL, msg.as_string())
         server.quit()
-        print("✅ Email report sent!")
-    except Exception as e:
-        print("❌ Failed to send email:", e)
+        console.print("✅ Email report sent!")
+    except smtplib.SMTPException as e:
+        console.print("❌ Failed to send email:", e)

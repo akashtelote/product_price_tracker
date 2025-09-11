@@ -1,9 +1,12 @@
 import asyncio
+
 from utils import playwright_price_scraper
+from utils.common import console
 
 
-def main():
-    print("Hello from price-scraper!")
+def main() -> None:
+    """Entry point for the price scraper."""
+    console.print("Hello from price-scraper!")
     asyncio.run(playwright_price_scraper.main())
 
 

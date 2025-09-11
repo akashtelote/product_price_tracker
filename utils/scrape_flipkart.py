@@ -1,8 +1,11 @@
 import statistics
 
+from utils.common import console
+
 DEBUG = False
 
-async def scrape_flipkart(url,page) -> tuple[float, float] | None:
+
+async def scrape_flipkart(url, page) -> tuple[float, float] | None:
     try:
         await page.goto(url, wait_until="networkidle")
 
@@ -17,22 +20,36 @@ async def scrape_flipkart(url,page) -> tuple[float, float] | None:
 
             # Skip unwanted text
             lowered = text.lower()
-            if any(skip in lowered for skip in [
-                "month", "emi", "delivery", "fee", "off", "save", 
-                "protect", "promise", "cashback", "card", "upto", "quarter"
-            ]):
+            if any(
+                skip in lowered
+                for skip in [
+                    "month",
+                    "emi",
+                    "delivery",
+                    "fee",
+                    "off",
+                    "save",
+                    "protect",
+                    "promise",
+                    "cashback",
+                    "card",
+                    "upto",
+                    "quarter",
+                ]
+            ):
                 continue
             if text.startswith("+") or "up to" in lowered:
                 continue
 
             import re
+
             match = re.search(r"₹\s?([\d,]+(?:\.\d{1,2})?)", text)
             if match:
                 price = float(match.group(1).replace(",", ""))
                 prices.append((price, text))
 
         if not prices:
-            print("No prices found on Flipkart page.")
+            console.print("No prices found on Flipkart page.")
             return None
 
         values = [p for p, _ in prices]
@@ -58,15 +75,14 @@ async def scrape_flipkart(url,page) -> tuple[float, float] | None:
         original_price = max(larger_prices) if larger_prices else current_price
 
         if DEBUG:
-            print(f"\nDEBUG - ")
-            print("All captured prices:", prices)
-            print("Filtered prices:", filtered)
-            print("Median value:", median_val)
-            print("Current price:", current_price, "| Original price:", original_price)
-
+            console.print("\nDEBUG - ")
+            console.print("All captured prices:", prices)
+            console.print("Filtered prices:", filtered)
+            console.print("Median value:", median_val)
+            console.print("Current price:", current_price, "| Original price:", original_price)
 
         return current_price, original_price
 
     except Exception as e:
-        print(f"Error scraping Flipkart: {e}")
+        console.print(f"Error scraping Flipkart: {e}")
         return None
