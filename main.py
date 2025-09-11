@@ -1,8 +1,10 @@
 """Entry point for Price Tracker."""
 
 import asyncio
+
 from utils import playwright_price_scraper
-from utils.common import safe_run, console
+from utils.common import safe_run
+
 
 def main() -> None:
     """Run the price tracker safely."""

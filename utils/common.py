@@ -1,30 +1,36 @@
 # utils/common.py
 """Shared Rich console for pretty output across the project."""
 
-from rich.console import Console
-from rich.table import Table
-console = Console()
-
-
+# ruff: noqa: BLE001
 
 import traceback
+from collections.abc import Callable
+from typing import ParamSpec, TypeVar
 
-def safe_run(func, *args, **kwargs):
-    """
-    Run a function safely. Returns the result or None if any error occurs.
-    Exceptions are logged to console with traceback.
+from rich.console import Console
+from rich.table import Table
+
+console = Console()
+
+P = ParamSpec("P")
+R = TypeVar("R")
+
+def safe_run(func: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R | None:
+    """Run a function safely.
+
+    Returns the result of the function or None if any error occurs.
+
+    Exceptions are logged to the console with traceback.
     """
     try:
         return func(*args, **kwargs)
-    except BaseException as e:  # safe fallback for all errors
+    except BaseException as e:  # Broad catch, safe fallback
         console.print("[red]Unexpected error:[/]", e)
         console.print(traceback.format_exc())
         return None
-    
-    
+
 def display_price_table(results: list[dict]) -> None:
-    """
-    Display price tracker results in a Rich table.
+    """Display price tracker results in a Rich table.
 
     Each item in results should have:
     - name: str
