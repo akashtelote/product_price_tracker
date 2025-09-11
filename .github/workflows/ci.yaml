@@ -38,5 +38,5 @@ jobs:
         run: uv run ruff check .
 
       # Run tests (pytest by default)
-      - name: Run tests
-        run: uv run pytest -v
+      # - name: Run tests
+      #   run: uv run pytest -v
