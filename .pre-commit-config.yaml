@@ -1,7 +1,10 @@
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.13.0  # Use the latest release
+    rev: v0.13.0
     hooks:
       - id: ruff
         name: ruff (lint + format)
         args: [--fix, --select, ALL]
+        stages: [commit]
+        fail_fast: false
+        always_run: true

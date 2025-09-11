@@ -1,14 +1,12 @@
+"""Entry point for Price Tracker."""
+
 import asyncio
-
 from utils import playwright_price_scraper
-from utils.common import console
-
+from utils.common import safe_run, console
 
 def main() -> None:
-    """Entry point for the price scraper."""
-    console.print("Hello from price-scraper!")
-    asyncio.run(playwright_price_scraper.main())
-
+    """Run the price tracker safely."""
+    safe_run(asyncio.run, playwright_price_scraper.main())
 
 if __name__ == "__main__":
     main()

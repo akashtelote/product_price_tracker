@@ -1,3 +1,4 @@
+"""Functions to send email reports."""
 import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -18,7 +19,7 @@ RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL", "targetemail@gmail.com")
 
 
 def send_report(results : list) -> None:
-    """Send email with HTML table."""
+    """Send email report of price scraping results."""
     subject = "Price Tracker Report"
     html = """
     <html>

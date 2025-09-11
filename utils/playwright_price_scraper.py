@@ -2,7 +2,7 @@ import asyncio
 
 from playwright.async_api import Page, async_playwright
 
-from utils.common import console
+from utils.common import console, display_price_table
 
 from .email_reports import send_report
 from .scrape_amazon import scrape_amazon
@@ -94,6 +94,7 @@ async def track_prices() -> None:
         await browser.close()
 
     if results:
+        display_price_table(results)
         send_report(results)
 
 
