@@ -4,58 +4,48 @@ on:
   push:
     branches:
       - main
+  schedule:
+    # Sync latest code at 4:55 AM IST every day
+    - cron: "25 23 * * *"
 
 jobs:
   deploy:
     runs-on: self-hosted
-
     steps:
-      - name: Checkout latest commit
+      - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0   # fetch full history
-          ref: main        # always sync with main branch
 
-      - name: Sync project to target folder
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+
+      - name: Install system deps
         run: |
-          rsync -av --delete ./ ~/Documents/Projects/Price_Scraper/
+          sudo apt-get update
+          sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libxkbcommon0 libxcomposite1 libxrandr2 libxdamage1 libgbm1 libpango-1.0-0 libcairo2
 
       - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Install dependencies
-        run: uv sync
-
-      # - name: Install Playwright browsers (with cache)
-      #   uses: actions/cache@v3
-      #   with:
-      #     path: ~/.cache/ms-playwright
-      #     key: playwright-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
-      #   id: playwright-cache
-
-      # - name: Run playwright install
-      #   run: uv run playwright install --with-deps
-
-      # - name: Run price tracker
-      #   run: uv run python main.py
-
-
-      - name: Print all envs
-        run: env
-
-      # 🔍 Debug: check if secret is injected
-      - name: Debug SMTP_PASSWORD
-        env:
-          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+      - name: Sync latest code (keep .env and local files)
         run: |
-          echo "SMTP_PASSWORD length: ${#SMTP_PASSWORD}"
-          echo "SMTP_PASSWORD first chars: ${SMTP_PASSWORD:0:3}***"
-          
-      - name: Run script with secrets
-        env:
-          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
-          RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
-          SENDER_PASSWORD: ${{ secrets.SENDER_PASSWORD }}
-        run: uv run python main.py
+          cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
+          git fetch origin main
+          git checkout main
+          git pull origin main
+
+      # - name: Install Python deps
+      #   run: |
+      #     cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
+      #     uv pip install -r requirements.txt
+
+      # - name: Install Playwright browsers
+      #   run: |
+      #     cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
+      #     uv run playwright install --with-deps
