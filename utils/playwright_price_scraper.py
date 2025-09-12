@@ -62,7 +62,7 @@ async def track_prices() -> None:
     results = report_details = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(
-            headless=False,
+            headless=True,
             #                               ,proxy={
             #     "server": "socks5://127.0.0.1:9050"
             # }
