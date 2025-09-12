@@ -41,6 +41,10 @@ jobs:
       # - name: Run price tracker
       #   run: uv run python main.py
 
+
+      - name: Print all envs
+        run: env
+
       # 🔍 Debug: check if secret is injected
       - name: Debug SMTP_PASSWORD
         env:
