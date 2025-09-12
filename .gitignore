@@ -10,3 +10,6 @@ wheels/
 .venv
 .env
 .uv
+
+# Database files
+price_tracker.db

@@ -2,13 +2,15 @@
 """Shared Rich console for pretty output across the project."""
 
 # ruff: noqa: BLE001
-
+import csv
 import traceback
 from collections.abc import Callable
 from typing import ParamSpec, TypeVar
 
 from rich.console import Console
 from rich.table import Table
+
+from .config import PRODUCTS_FILE
 
 console = Console()
 
@@ -28,6 +30,25 @@ def safe_run(func: Callable[P, R], *args: P.args, **kwargs: P.kwargs) -> R | Non
         console.print("[red]Unexpected error:[/]", e)
         console.print(traceback.format_exc())
         return None
+
+def fetch_products() -> list[dict]:
+    """Fetch product list from products.py."""
+    try:
+        products = []
+        # Read products from CSV
+        with open(PRODUCTS_FILE, newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                products.append({
+                    "name": row["name"],
+                    "url": row["url"],
+                    "platform": row["platform"].lower(),
+                    "threshold": float(row["threshold"]),
+                })
+    except ImportError as e:
+        console.print("[red]Error importing PRODUCTS:[/]", e)
+        return []
+    return products
 
 def display_price_table(results: list[dict]) -> None:
     """Display price tracker results in a Rich table.
