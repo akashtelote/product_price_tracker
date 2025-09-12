@@ -41,6 +41,14 @@ jobs:
       # - name: Run price tracker
       #   run: uv run python main.py
 
+      # 🔍 Debug: check if secret is injected
+      - name: Debug SMTP_PASSWORD
+        env:
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          echo "SMTP_PASSWORD length: ${#SMTP_PASSWORD}"
+          echo "SMTP_PASSWORD first chars: ${SMTP_PASSWORD:0:3}***"
+          
       - name: Run script with secrets
         env:
           SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
