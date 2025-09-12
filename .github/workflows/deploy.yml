@@ -1,9 +1,9 @@
-name: Price Scraper CI
+name: Price Scraper
 
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch: # run manually
+  schedule:
+    - cron: "0 5 * * *" # every day at 5 AM
 
 jobs:
   run-on-pi:
@@ -18,19 +18,17 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Cache uv dependencies
+      - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
-          path: ~/.cache/uv
-          key: uv-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
-          restore-keys: |
-            uv-${{ runner.os }}-
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ runner.arch }}
 
       - name: Install dependencies
         run: uv sync --frozen
 
-      - name: Run Ruff checks
-        run: uv run ruff check .
+      - name: Install Playwright Chromium
+        run: uv run playwright install chromium
 
       - name: Run Price Scraper
         run: uv run python main.py
