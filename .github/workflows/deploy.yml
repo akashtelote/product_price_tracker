@@ -1,0 +1,23 @@
+name: Deploy on Raspberry Pi
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python with uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          export PATH="$HOME/.cargo/bin:$PATH"
+          uv sync --frozen
+
+      - name: Restart scraper
+        run: |
+          systemctl --user restart price_scraper.service || true
