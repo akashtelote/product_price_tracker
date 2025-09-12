@@ -1,13 +1,14 @@
-name: Deploy on Raspberry Pi
+name: Price Scraper CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+  pull_request:
 
 jobs:
   run-on-pi:
     runs-on: [self-hosted, linux, ARM64]
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -15,11 +16,21 @@ jobs:
       - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          echo "$HOME/.local/bin" >> $GITHUB_PATH   # add uv to PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Verify uv works
-        run: uv --version
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
 
-      - name: Restart scraper
-        run: |
-          systemctl --user restart price_scraper.service || true
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run Ruff checks
+        run: uv run ruff check .
+
+      - name: Run Price Scraper
+        run: uv run python main.py
