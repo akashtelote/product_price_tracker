@@ -4,10 +4,10 @@ from playwright.async_api import Page, async_playwright
 
 from utils.common import console, display_price_table, fetch_products
 from utils.db import init_db, save_price
+
 from .email_reports import send_report
 from .scrape_amazon import scrape_amazon
 from .scrape_flipkart import scrape_flipkart
-
 
 CHECK_INTERVAL = 60 * 60  # check every 1 hour
 
@@ -83,7 +83,7 @@ async def track_prices() -> None:
                 results.append(info)
                 current_price = info["current_price"]
                 console.print(
-                    f"[cyan]{product['name']}[/] => ₹{current_price} (Threshold ₹{product['threshold']})"
+                    f"[cyan]{product['name']}[/] => ₹{current_price} (Threshold ₹{product['threshold']})",
                 )
 
                 # Save price to DB
