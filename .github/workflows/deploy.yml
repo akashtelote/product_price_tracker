@@ -28,15 +28,23 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Install Playwright browsers (with cache)
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
-        id: playwright-cache
+      # - name: Install Playwright browsers (with cache)
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ~/.cache/ms-playwright
+      #     key: playwright-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+      #   id: playwright-cache
 
-      - name: Run playwright install
-        run: uv run playwright install --with-deps
+      # - name: Run playwright install
+      #   run: uv run playwright install --with-deps
 
-      - name: Run price tracker
+      # - name: Run price tracker
+      #   run: uv run python main.py
+
+      - name: Run script with secrets
+        env:
+          SENDER_EMAIL: ${{ secrets.SENDER_EMAIL }}
+          RECEIVER_EMAIL: ${{ secrets.RECEIVER_EMAIL }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: uv run python main.py
