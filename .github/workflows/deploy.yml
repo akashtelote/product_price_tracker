@@ -6,17 +6,19 @@ on:
       - main
 
 jobs:
-  deploy:
-    runs-on: self-hosted
+  run-on-pi:
+    runs-on: [self-hosted, linux, ARM64]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Setup Python with uv
+      - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
-          export PATH="$HOME/.cargo/bin:$PATH"
-          uv sync --frozen
+          echo "$HOME/.local/bin" >> $GITHUB_PATH   # add uv to PATH
+
+      - name: Verify uv works
+        run: uv --version
 
       - name: Restart scraper
         run: |
