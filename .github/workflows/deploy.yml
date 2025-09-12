@@ -1,36 +1,42 @@
-name: Price Scraper
+name: Deploy to Raspberry Pi
 
 on:
-  workflow_dispatch: # run manually
-  schedule:
-    - cron: "0 5 * * *" # every day at 5 AM
+  push:
+    branches:
+      - main
 
 jobs:
-  run-on-pi:
-    runs-on: [self-hosted, linux, ARM64]
+  deploy:
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout repo
+      - name: Checkout latest commit
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # fetch all history, not shallow
+          fetch-depth: 0   # fetch full history
           ref: main        # always sync with main branch
+
+      - name: Sync project to target folder
+        run: |
+          rsync -av --delete ./ ~/Documents/Projects/Price_Scraper/
+
       - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v4
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Install Playwright browsers (with cache)
+        uses: actions/cache@v3
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ runner.arch }}
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/uv.lock') }}
+        id: playwright-cache
 
-      - name: Install dependencies
-        run: uv sync --frozen
+      - name: Run playwright install
+        run: uv run playwright install --with-deps
 
-      - name: Install Playwright Chromium
-        run: uv run playwright install chromium
-
-      - name: Run Price Scraper
+      - name: Run price tracker
         run: uv run python main.py
