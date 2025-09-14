@@ -49,3 +49,8 @@ jobs:
       #   run: |
       #     cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
       #     uv run playwright install --with-deps
+
+      - name: Restart tracker
+        run: |
+          cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
+          uv run python main.py

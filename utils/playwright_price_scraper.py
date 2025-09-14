@@ -75,7 +75,6 @@ async def track_prices() -> None:
             ),
         )
         page = await context.new_page()
-        console.print(f"{type(page)=}")
 
         for product in products:
             info = await scrape_product(page, product)
