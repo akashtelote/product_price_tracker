@@ -3,6 +3,7 @@
 import sqlite3
 from datetime import datetime
 from pathlib import Path
+
 from utils.common import console
 
 DB_PATH = Path("price_tracker.db")
