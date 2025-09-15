@@ -5,12 +5,13 @@ on:
     branches:
       - main
   schedule:
-    # Sync latest code at 4:55 AM IST every day
+    # Run at 4:55 AM IST every day
     - cron: "25 23 * * *"
 
 jobs:
   deploy:
     runs-on: self-hosted
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -26,31 +27,34 @@ jobs:
       - name: Install system deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 libxkbcommon0 libxcomposite1 libxrandr2 libxdamage1 libgbm1 libpango-1.0-0 libcairo2
+          sudo apt-get install -y libnss3 libatk1.0-0 libatk-bridge2.0-0 \
+            libxkbcommon0 libxcomposite1 libxrandr2 libxdamage1 libgbm1 \
+            libpango-1.0-0 libcairo2
 
       - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-      - name: Sync latest code (keep .env and local files)
+      - name: Sync latest code (keep .env)
         run: |
           cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
           git fetch origin main
           git checkout main
           git pull origin main
 
-      # - name: Install Python deps
-      #   run: |
-      #     cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
-      #     uv pip install -r requirements.txt
-
-      # - name: Install Playwright browsers
-      #   run: |
-      #     cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
-      #     uv run playwright install --with-deps
-
-      - name: Restart tracker
+      - name: Install Python deps
         run: |
           cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
-          uv run python main.py
+          uv sync
+
+      - name: Install Playwright browsers
+        run: |
+          cd ~/actions-runner/_work/product_price_tracker/product_price_tracker
+          uv run playwright install --with-deps
+
+      - name: Restart tracker service
+        run: |
+          sudo systemctl daemon-reload
+          sudo systemctl restart price_tracker.service
+          sudo systemctl status price_tracker.service --no-pager

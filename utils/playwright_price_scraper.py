@@ -27,7 +27,6 @@ async def scrape_product(page:Page, product:dict) -> dict | None:
 
     elif "flipkart" in url:
         flipkart_scraped_prices = await scrape_flipkart(url, page)
-        console.print(f"{flipkart_scraped_prices=}")
         if flipkart_scraped_prices is None:
             return None
         current_price, original_price = flipkart_scraped_prices
@@ -59,7 +58,8 @@ async def track_prices() -> None:
     if not products:
         console.print("No products to track. Please add products to the PRODUCTS list.")
         return
-    results = report_details = []
+    results = []
+    report_details = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(
             headless=True,
@@ -95,6 +95,7 @@ async def track_prices() -> None:
                 )
                 # Check threshold
                 if current_price <= product["threshold"]:
+                    console.print(f"🎉 [bold green]{product['name']} is below the threshold price![/]")
                     report_details.append(info)
             else:
                 console.print(f"❌ Failed to fetch price for {product['name']}")
